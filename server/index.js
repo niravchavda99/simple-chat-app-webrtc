@@ -4,12 +4,19 @@ const http = require("http");
 const { v4: uuidv4 } = require("uuid");
 const app = express();
 
-const PORT = process.env.PORT || 9000;
+const PORT = process.env.PORT || 3900;
 const server = http.createServer(app);
 
 const wss = new WebSocket.Server({ server });
 
 let users = {};
+
+const config = require("config");
+
+require("./startup/cors")(app);
+require("./startup/routes")(app);
+require("./startup/db")();
+require("./startup/config")();
 
 const sendTo = (connection, message) => {
   connection.send(JSON.stringify(message));
@@ -128,7 +135,7 @@ wss.on("connection", (ws) => {
   );
 
   ws.on("close", function () {
-    delete users[ws.name];
+    // delete users[ws.name];
     sendToAll(users, "leave", ws);
   });
 });
